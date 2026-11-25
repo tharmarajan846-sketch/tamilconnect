@@ -1,0 +1,137 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Tamil Connect - Connect, Create, Discover and Earn.">
+<title>Tamil Connect | Your Community</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;background:#f5f6fa;color:#20243a}
+header{background:#fff;padding:16px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px #0000000d;position:sticky;top:0}
+.logo{font-size:23px;font-weight:800;color:#5546d8}
+nav a{margin-left:20px;text-decoration:none;color:#444;font-size:14px}
+.btn{background:#5546d8;color:white;padding:11px 19px;border:0;border-radius:9px;font-weight:bold;cursor:pointer}
+.hero{padding:65px 7%;text-align:center;background:linear-gradient(135deg,#eeedff,#e7f5ff)}
+.hero h1{font-size:clamp(32px,7vw,55px);line-height:1.15;margin-bottom:18px}
+.hero h1 span{color:#5546d8}
+.hero p{font-size:17px;color:#62677b;line-height:1.7;max-width:600px;margin:0 auto 25px}
+section{padding:45px 7%}
+.heading{text-align:center;font-size:27px;margin-bottom:25px}
+.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
+.card{background:white;padding:25px;border-radius:15px;box-shadow:0 5px 20px #00000008}
+.card .emoji{font-size:32px;margin-bottom:13px}
+.card h3{margin-bottom:10px}
+.card p{color:#70758a;line-height:1.6;font-size:14px}
+.ai{background:#242044;color:white;border-radius:18px;text-align:center;padding:35px 20px}
+.ai p{color:#d0cce9;margin:13px 0 20px}
+.ai input{width:min(100%,400px);padding:14px;border:0;border-radius:9px;margin-bottom:10px}
+.feed{max-width:600px;margin:auto}
+.post{background:white;border-radius:14px;padding:20px;margin-bottom:16px}
+.post p{color:#666;margin-top:12px;line-height:1.6}
+footer{text-align:center;background:#20203c;color:white;padding:30px 15px;line-height:2}
+footer p{color:#c7c5da;font-size:13px}
+button:focus,input:focus{outline:2px solid #887cf0}
+@media(max-width:600px){
+nav a:not(.login){display:none}
+.hero{padding:55px 6%}
+section{padding:35px 6%}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Tamil Connect.</div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#features">Features</a>
+    <a href="#ai">AI Assistant</a>
+    <a class="login" href="#join">Join Us</a>
+  </nav>
+</header>
+
+<main>
+<section class="hero" id="home">
+  <h1>Connect. <span>Create.</span><br>Discover. Earn.</h1>
+  <p>Your world, your community. Connect with people, share your creativity and experience the power of AI with Tamil Connect.</p>
+  <button class="btn" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Get Started →</button>
+</section>
+
+<section id="features">
+  <h2 class="heading">Explore Tamil Connect</h2>
+  <div class="features">
+    <div class="card">
+      <div class="emoji">👥</div>
+      <h3>Social Community</h3>
+      <p>Connect with people, share posts, follow friends and build your community.</p>
+    </div>
+    <div class="card">
+      <div class="emoji">🤖</div>
+      <h3>AI Assistant</h3>
+      <p>Explore AI-powered assistance in Tamil and English.</p>
+    </div>
+    <div class="card">
+      <div class="emoji">🎬</div>
+      <h3>Photos & Videos</h3>
+      <p>Share your moments, creativity, photos and videos.</p>
+    </div>
+    <div class="card">
+      <div class="emoji">💼</div>
+      <h3>Business Connect</h3>
+      <p>Discover businesses, products and advertising opportunities.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ai">
+  <div class="ai">
+    <h2>✨ Meet Tamil Connect AI</h2>
+    <p>Your AI companion for Tamil and English.</p>
+    <input id="question" type="text" placeholder="Ask something...">
+    <br>
+    <button class="btn" onclick="askAI()">Try AI Assistant</button>
+    <p id="answer" aria-live="polite"></p>
+  </div>
+</section>
+
+<section>
+  <h2 class="heading">Community Preview</h2>
+  <div class="feed">
+    <div class="post">
+      <strong>🌟 Tamil Connect Community</strong>
+      <p>Welcome to a new world of connection and creativity. Our journey starts here!</p>
+      <p>❤️ Like &nbsp; 💬 Comment &nbsp; ↗ Share</p>
+    </div>
+    <div class="post">
+      <strong>🚀 Our Vision</strong>
+      <p>Bringing AI technology and social networking together for everyone.</p>
+      <p>❤️ Like &nbsp; 💬 Comment &nbsp; ↗ Share</p>
+    </div>
+  </div>
+</section>
+
+<section id="join" style="text-align:center">
+  <h2 class="heading">Be Part of Our Journey</h2>
+  <p style="color:#666;margin-bottom:20px">Tamil Connect is just getting started.</p>
+  <button class="btn" onclick="alert('Thank you for your interest! Registration is coming soon.')">Join Tamil Connect</button>
+</section>
+</main>
+
+<footer>
+  <h2>Tamil Connect.</h2>
+  <p>Connect • Create • Discover • Earn</p>
+  <p>© 2026 Tamil Connect. All rights reserved.</p>
+</footer>
+
+<script>
+function askAI(){
+  const q=document.getElementById('question').value.trim();
+  const a=document.getElementById('answer');
+  if(!q){a.textContent='Please enter a question first.';return;}
+  a.textContent='AI integration is coming soon! Your question: '+q;
+}
+</script>
+</body>
+</html>
