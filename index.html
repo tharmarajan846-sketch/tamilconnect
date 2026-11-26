@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +8,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;background:#f5f6fa;color:#20243a}
-header{background:#fff;padding:16px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px #0000000d;position:sticky;top:0}
+header{background:#fff;padding:16px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px #0000000d;position:sticky;top:0;z-index:10}
 .logo{font-size:23px;font-weight:800;color:#5546d8}
 nav a{margin-left:20px;text-decoration:none;color:#444;font-size:14px}
 .btn{background:#5546d8;color:white;padding:11px 19px;border:0;border-radius:9px;font-weight:bold;cursor:pointer}
@@ -28,11 +27,13 @@ section{padding:45px 7%}
 .ai p{color:#d0cce9;margin:13px 0 20px}
 .ai input{width:min(100%,400px);padding:14px;border:0;border-radius:9px;margin-bottom:10px}
 .feed{max-width:600px;margin:auto}
-.post{background:white;border-radius:14px;padding:20px;margin-bottom:16px}
-.post p{color:#666;margin-top:12px;line-height:1.6}
+.post{background:white;border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 3px 12px #00000008}
+.post p{color:#666;margin-top:10px;line-height:1.6}
+.post input,.post textarea{width:100%;padding:11px;margin-bottom:10px;border:1px solid #d5d8e5;border-radius:8px;font-family:inherit}
+.post textarea{min-height:80px}
 footer{text-align:center;background:#20203c;color:white;padding:30px 15px;line-height:2}
 footer p{color:#c7c5da;font-size:13px}
-button:focus,input:focus{outline:2px solid #887cf0}
+button:focus,input:focus,textarea:focus{outline:2px solid #887cf0}
 @media(max-width:600px){
 nav a:not(.login){display:none}
 .hero{padding:55px 6%}
@@ -96,18 +97,19 @@ section{padding:35px 6%}
   </div>
 </section>
 
-<section>
-  <h2 class="heading">Community Preview</h2>
+<section id="community">
+  <h2 class="heading">Community Posts</h2>
   <div class="feed">
-    <div class="post">
-      <strong>🌟 Tamil Connect Community</strong>
-      <p>Welcome to a new world of connection and creativity. Our journey starts here!</p>
-      <p>❤️ Like &nbsp; 💬 Comment &nbsp; ↗ Share</p>
-    </div>
-    <div class="post">
-      <strong>🚀 Our Vision</strong>
-      <p>Bringing AI technology and social networking together for everyone.</p>
-      <p>❤️ Like &nbsp; 💬 Comment &nbsp; ↗ Share</p>
+    <form class="post" onsubmit="addPost(event)">
+      <input id="post-author" type="text" placeholder="உங்கள் பெயர் (Your name)" required>
+      <textarea id="post-content" placeholder="உங்கள் கருத்தை எழுதுங்கள்..." required></textarea>
+      <button class="btn" type="submit">Publish Post</button>
+    </form>
+    <div id="db-posts">
+      <div class="post">
+        <strong>🌟 Tamil Connect Community</strong>
+        <p>Welcome to a new world of connection and creativity. Our journey starts here!</p>
+      </div>
     </div>
   </div>
 </section>
@@ -125,13 +127,43 @@ section{padding:35px 6%}
   <p>© 2026 Tamil Connect. All rights reserved.</p>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+const SUPABASE_URL = 'https://dkkxxhkztdsaxjnnxyel.supabase.co';
+const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 function askAI(){
   const q=document.getElementById('question').value.trim();
   const a=document.getElementById('answer');
   if(!q){a.textContent='Please enter a question first.';return;}
   a.textContent='AI integration is coming soon! Your question: '+q;
 }
+
+async function loadPosts(){
+  const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
+  const box = document.getElementById('db-posts');
+  if(error || !data || data.length === 0) return;
+  box.innerHTML = data.map(p =>
+    '<div class="post"><strong>' + p.author_name.replace(/</g,'&lt;') + '</strong><p>' + p.content.replace(/</g,'&lt;') + '</p></div>'
+  ).join('');
+}
+
+async function addPost(e){
+  e.preventDefault();
+  const author_name = document.getElementById('post-author').value.trim();
+  const content = document.getElementById('post-content').value.trim();
+  if(!author_name || !content) return;
+  const { error } = await db.from('posts').insert([{ author_name, content }]);
+  if(!error){
+    document.getElementById('post-content').value = '';
+    loadPosts();
+  } else {
+    alert('Error saving post: ' + error.message);
+  }
+}
+
+loadPosts();
 </script>
 </body>
 </html>
