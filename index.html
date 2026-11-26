@@ -1,234 +1,161 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Tamil Connect - Connect, Create, Discover and Earn.">
-<title>Tamil Connect | Your Community</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;background:#f5f6fa;color:#20243a}
-header{background:#fff;padding:16px 6%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 12px #0000000d;position:sticky;top:0;z-index:10}
-.logo{font-size:23px;font-weight:800;color:#5546d8}
-nav a{margin-left:20px;text-decoration:none;color:#444;font-size:14px}
-.btn{background:#5546d8;color:white;padding:11px 19px;border:0;border-radius:9px;font-weight:bold;cursor:pointer}
-.hero{padding:65px 7%;text-align:center;background:linear-gradient(135deg,#eeedff,#e7f5ff)}
-.hero h1{font-size:clamp(32px,7vw,55px);line-height:1.15;margin-bottom:18px}
-.hero h1 span{color:#5546d8}
-.hero p{font-size:17px;color:#62677b;line-height:1.7;max-width:600px;margin:0 auto 25px}
-section{padding:45px 7%}
-.heading{text-align:center;font-size:27px;margin-bottom:25px}
-.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
-.card{background:white;padding:25px;border-radius:15px;box-shadow:0 5px 20px #00000008}
-.card .emoji{font-size:32px;margin-bottom:13px}
-.card h3{margin-bottom:10px}
-.card p{color:#70758a;line-height:1.6;font-size:14px}
-.ai{background:#242044;color:white;border-radius:18px;text-align:center;padding:35px 20px}
-.ai p{color:#d0cce9;margin:13px 0 20px}
-.ai input{width:min(100%,400px);padding:14px;border:0;border-radius:9px;margin-bottom:10px}
-.feed{max-width:600px;margin:auto}
-.post{background:white;border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 3px 12px #00000008}
-.post p{color:#666;margin-top:10px;line-height:1.6}
-.post input,.post textarea{width:100%;padding:11px;margin-bottom:10px;border:1px solid #d5d8e5;border-radius:8px;font-family:inherit}
-.post textarea{min-height:80px}
-footer{text-align:center;background:#20203c;color:white;padding:30px 15px;line-height:2}
-footer p{color:#c7c5da;font-size:13px}
-button:focus,input:focus,textarea:focus{outline:2px solid #887cf0}
-@media(max-width:600px){
-nav a:not(.login){display:none}
-.hero{padding:55px 6%}
-section{padding:35px 6%}
-}
-</style>
-</head>
-<body>
+-- ==========================================
+-- TAMIL CONNECT - COMPLETE DATABASE SETUP
+-- ==========================================
 
-<header>
-  <div class="logo">Tamil Connect.</div>
-  <nav>
-    <a href="#home">Home</a>
-    <a href="#features">Features</a>
-    <a href="#ai">AI Assistant</a>
-    <a class="login" href="#join">Sign Up / Login</a>
-  </nav>
-</header>
+-- 1. ENSURE USER OWNERSHIP IN POSTS
+ALTER TABLE public.posts
+ADD COLUMN IF NOT EXISTS user_id UUID
+REFERENCES auth.users(id) ON DELETE CASCADE;
 
-<main>
-<section class="hero" id="home">
-  <h1>Connect. <span>Create.</span><br>Discover. Earn.</h1>
-  <p>Your world, your community. Connect with people, share your creativity and experience the power of AI with Tamil Connect.</p>
-  <button class="btn" onclick="document.getElementById('join').scrollIntoView({behavior:'smooth'})">Get Started →</button>
-</section>
+-- 2. ENABLE ROW LEVEL SECURITY
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.likes ENABLE ROW LEVEL SECURITY;
 
-<section id="features">
-  <h2 class="heading">Explore Tamil Connect</h2>
-  <div class="features">
-    <div class="card">
-      <div class="emoji">👥</div>
-      <h3>Social Community</h3>
-      <p>Connect with people, share posts, follow friends and build your community.</p>
-    </div>
-    <div class="card">
-      <div class="emoji">🤖</div>
-      <h3>AI Assistant</h3>
-      <p>Explore AI-powered assistance in Tamil and English.</p>
-    </div>
-    <div class="card">
-      <div class="emoji">🎬</div>
-      <h3>Photos & Videos</h3>
-      <p>Share your moments, creativity, photos and videos.</p>
-    </div>
-    <div class="card">
-      <div class="emoji">💼</div>
-      <h3>Business Connect</h3>
-      <p>Discover businesses, products and advertising opportunities.</p>
-    </div>
-  </div>
-</section>
+-- 3. REMOVE OLD POLICIES TO AVOID DUPLICATES
 
-<section id="ai">
-  <div class="ai">
-    <h2>✨ Meet Tamil Connect AI</h2>
-    <p>Your AI companion for Tamil and English.</p>
-    <input id="question" type="text" placeholder="Ask something...">
-    <br>
-    <button class="btn" onclick="askAI()">Try AI Assistant</button>
-    <p id="answer" aria-live="polite"></p>
-  </div>
-</section>
+DROP POLICY IF EXISTS "Public insert access" ON public.posts;
+DROP POLICY IF EXISTS "Public read access" ON public.posts;
+DROP POLICY IF EXISTS "Authenticated users create posts" ON public.posts;
+DROP POLICY IF EXISTS "Authenticated user create post" ON public.posts;
+DROP POLICY IF EXISTS "Users update own posts" ON public.posts;
+DROP POLICY IF EXISTS "Users delete own posts" ON public.posts;
 
-<section id="community">
-  <h2 class="heading">Community Posts</h2>
-  <div class="feed">
-    <form class="post" onsubmit="addPost(event)">
-      <input id="post-author" type="text" placeholder="உங்கள் பெயர் (Your name)" required>
-      <textarea id="post-content" placeholder="உங்கள் கருத்தை எழுதுங்கள்..." required></textarea>
-      <button class="btn" type="submit">Publish Post</button>
-    </form>
-    <div id="db-posts">
-      <div class="post">
-        <strong>🌟 Tamil Connect Community</strong>
-        <p>Welcome to a new world of connection and creativity. Our journey starts here!</p>
-      </div>
-    </div>
-  </div>
-</section>
+DROP POLICY IF EXISTS "Public can view profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Users can create own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Profiles viewable by everyone" ON public.profiles;
+DROP POLICY IF EXISTS "Users create own profile" ON public.profiles;
 
-<section id="join">
-  <h2 class="heading">User Sign Up / Login</h2>
-  <div class="feed">
-    <div class="post" id="auth-box">
-      <input id="auth-email" type="email" placeholder="Email முகவரி (Email)" required>
-      <input id="auth-password" type="password" placeholder="Password (குறைந்தது 6 எழுத்துக்கள்)" required>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn" type="button" onclick="signUpUser()">Sign Up</button>
-        <button class="btn" type="button" onclick="loginUser()">Login</button>
-        <button class="btn" type="button" onclick="logoutUser()" style="background:#444">Logout</button>
-      </div>
-      <p id="auth-status" style="margin-top:12px;font-weight:bold"></p>
-    </div>
-  </div>
-</section>
-</main>
+DROP POLICY IF EXISTS "Public can view likes" ON public.likes;
+DROP POLICY IF EXISTS "Users can add own likes" ON public.likes;
+DROP POLICY IF EXISTS "Users can remove own likes" ON public.likes;
+DROP POLICY IF EXISTS "Likes viewable by everyone" ON public.likes;
+DROP POLICY IF EXISTS "Authenticated users like posts" ON public.likes;
+DROP POLICY IF EXISTS "Users remove own likes" ON public.likes;
 
-<footer>
-  <h2>Tamil Connect.</h2>
-  <p>Connect • Create • Discover • Earn</p>
-  <p>© 2026 Tamil Connect. All rights reserved.</p>
-</footer>
+-- 4. POSTS SECURITY
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = 'https://dkkxxhkztdsaxjnmxyei.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_zzsde7nPjBoAYLSRVhqYGA_U8S3NwBB';
-const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+CREATE POLICY "Public read access"
+ON public.posts
+FOR SELECT
+TO anon, authenticated
+USING (true);
 
-function askAI(){
-  const q=document.getElementById('question').value.trim();
-  const a=document.getElementById('answer');
-  if(!q){a.textContent='Please enter a question first.';return;}
-  a.textContent='AI integration is coming soon! Your question: '+q;
-}
+CREATE POLICY "Authenticated users create posts"
+ON public.posts
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
 
-async function loadPosts(){
-  const { data, error } = await db.from('posts').select('*').order('created_at', { ascending: false });
-  const box = document.getElementById('db-posts');
-  if(error || !data || data.length === 0) return;
-  box.innerHTML = data.map(p =>
-    '<div class="post"><strong>' + p.author_name.replace(/</g,'&lt;') + '</strong><p>' + p.content.replace(/</g,'&lt;') + '</p></div>'
-  ).join('');
-}
+CREATE POLICY "Users update own posts"
+ON public.posts
+FOR UPDATE
+TO authenticated
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
-async function addPost(e){
-  e.preventDefault();
-  const author_name = document.getElementById('post-author').value.trim();
-  const content = document.getElementById('post-content').value.trim();
-  if(!author_name || !content) return;
-  const { error } = await db.from('posts').insert([{ author_name, content }]);
-  if(!error){
-    document.getElementById('post-content').value = '';
-    loadPosts();
-  } else {
-    alert('Error saving post: ' + error.message);
-  }
-}
+CREATE POLICY "Users delete own posts"
+ON public.posts
+FOR DELETE
+TO authenticated
+USING (auth.uid() = user_id);
 
-function setAuthStatus(msg, isError = false){
-  const el = document.getElementById('auth-status');
-  el.textContent = msg;
-  el.style.color = isError ? '#c62828' : '#2e7d32';
-}
+-- 5. PROFILES SECURITY
 
-async function signUpUser(){
-  const email = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  if(!email || password.length < 6){
-    setAuthStatus('சரியான Email மற்றும் குறைந்தது 6 எழுத்து Password உள்ளிடவும்.', true);
-    return;
-  }
-  const { data, error } = await db.auth.signUp({ email, password });
-  if(error){
-    setAuthStatus('Sign Up Error: ' + error.message, true);
-    return;
-  }
-  setAuthStatus(
-    data.session
-      ? 'பதிவு வெற்றி! இப்போது உள்நுழைந்துள்ளீர்கள்: ' + email
-      : 'பதிவு முடிந்தது! உங்கள் Email-ஐ சரிபார்த்து பிறகு Login செய்யவும்.'
-  );
-}
+CREATE POLICY "Public can view profiles"
+ON public.profiles
+FOR SELECT
+TO anon, authenticated
+USING (true);
 
-async function loginUser(){
-  const email = document.getElementById('auth-email').value.trim();
-  const password = document.getElementById('auth-password').value;
-  if(!email || !password){
-    setAuthStatus('Email மற்றும் Password உள்ளிடவும்.', true);
-    return;
-  }
-  const { data, error } = await db.auth.signInWithPassword({ email, password });
-  if(error){
-    setAuthStatus('Login Error: ' + error.message, true);
-    return;
-  }
-  setAuthStatus('வெற்றிகரமாக உள்நுழைந்துள்ளீர்கள்: ' + data.user.email);
-}
+CREATE POLICY "Users can create own profile"
+ON public.profiles
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = id);
 
-async function logoutUser(){
-  const { error } = await db.auth.signOut();
-  if(error){
-    setAuthStatus('Logout Error: ' + error.message, true);
-    return;
-  }
-  setAuthStatus('வெளியேறிவிட்டீர்கள் (Logged out).');
-}
+CREATE POLICY "Users can update own profile"
+ON public.profiles
+FOR UPDATE
+TO authenticated
+USING (auth.uid() = id)
+WITH CHECK (auth.uid() = id);
 
-db.auth.getUser().then(({ data }) => {
-  if(data && data.user){
-    setAuthStatus('தற்போது உள்நுழைந்துள்ள பயனர்: ' + data.user.email);
-  }
-});
+-- 6. LIKES SECURITY
 
-loadPosts();
-</script>
-</body>
-</html>
+CREATE POLICY "Public can view likes"
+ON public.likes
+FOR SELECT
+TO anon, authenticated
+USING (true);
+
+CREATE POLICY "Users can add own likes"
+ON public.likes
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can remove own likes"
+ON public.likes
+FOR DELETE
+TO authenticated
+USING (auth.uid() = user_id);
+
+-- 7. AUTOMATIC USER PROFILE CREATION
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  INSERT INTO public.profiles
+    (id, username, full_name)
+  VALUES (
+    NEW.id,
+    'user_' || replace(NEW.id::text, '-', ''),
+    COALESCE(NEW.raw_user_meta_data ->> 'full_name', '')
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS on_auth_user_created
+ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW
+EXECUTE FUNCTION public.handle_new_user();
+
+-- 8. CREATE PROFILES FOR EXISTING USERS
+
+INSERT INTO public.profiles (id, username, full_name)
+SELECT
+  u.id,
+  'user_' || replace(u.id::text, '-', ''),
+  COALESCE(u.raw_user_meta_data ->> 'full_name', '')
+FROM auth.users u
+ON CONFLICT (id) DO NOTHING;
+
+-- 9. PERFORMANCE INDEXES
+
+CREATE INDEX IF NOT EXISTS idx_posts_user_id
+ON public.posts(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_posts_created_at
+ON public.posts(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_likes_post_id
+ON public.likes(post_id);
+
+CREATE INDEX IF NOT EXISTS idx_likes_user_id
+ON public.likes(user_id);
+
+-- ==========================================
+-- TAMIL CONNECT DATABASE SETUP COMPLETE
+-- ==========================================
