@@ -49,7 +49,7 @@ section{padding:35px 6%}
     <a href="#home">Home</a>
     <a href="#features">Features</a>
     <a href="#ai">AI Assistant</a>
-    <a class="login" href="#join">Join Us</a>
+    <a class="login" href="#join">Sign Up / Login</a>
   </nav>
 </header>
 
@@ -114,10 +114,20 @@ section{padding:35px 6%}
   </div>
 </section>
 
-<section id="join" style="text-align:center">
-  <h2 class="heading">Be Part of Our Journey</h2>
-  <p style="color:#666;margin-bottom:20px">Tamil Connect is just getting started.</p>
-  <button class="btn" onclick="alert('Thank you for your interest! Registration is coming soon.')">Join Tamil Connect</button>
+<section id="join">
+  <h2 class="heading">User Sign Up / Login</h2>
+  <div class="feed">
+    <div class="post" id="auth-box">
+      <input id="auth-email" type="email" placeholder="Email முகவரி (Email)" required>
+      <input id="auth-password" type="password" placeholder="Password (குறைந்தது 6 எழுத்துக்கள்)" required>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn" type="button" onclick="signUpUser()">Sign Up</button>
+        <button class="btn" type="button" onclick="loginUser()">Login</button>
+        <button class="btn" type="button" onclick="logoutUser()" style="background:#444">Logout</button>
+      </div>
+      <p id="auth-status" style="margin-top:12px;font-weight:bold"></p>
+    </div>
+  </div>
 </section>
 </main>
 
@@ -129,8 +139,8 @@ section{padding:35px 6%}
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://dkkxxhkztdsaxjnnxyel.supabase.co';
-const SUPABASE_KEY = 'YOUR_SUPABASE_PUBLISHABLE_KEY';
+const SUPABASE_URL = 'https://dkkxxhkztdsaxjnmxyei.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_zzsde7nPjBoAYLSRVhqYGA_U8S3NwBB';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function askAI(){
@@ -162,6 +172,61 @@ async function addPost(e){
     alert('Error saving post: ' + error.message);
   }
 }
+
+function setAuthStatus(msg, isError = false){
+  const el = document.getElementById('auth-status');
+  el.textContent = msg;
+  el.style.color = isError ? '#c62828' : '#2e7d32';
+}
+
+async function signUpUser(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if(!email || password.length < 6){
+    setAuthStatus('சரியான Email மற்றும் குறைந்தது 6 எழுத்து Password உள்ளிடவும்.', true);
+    return;
+  }
+  const { data, error } = await db.auth.signUp({ email, password });
+  if(error){
+    setAuthStatus('Sign Up Error: ' + error.message, true);
+    return;
+  }
+  setAuthStatus(
+    data.session
+      ? 'பதிவு வெற்றி! இப்போது உள்நுழைந்துள்ளீர்கள்: ' + email
+      : 'பதிவு முடிந்தது! உங்கள் Email-ஐ சரிபார்த்து பிறகு Login செய்யவும்.'
+  );
+}
+
+async function loginUser(){
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if(!email || !password){
+    setAuthStatus('Email மற்றும் Password உள்ளிடவும்.', true);
+    return;
+  }
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+  if(error){
+    setAuthStatus('Login Error: ' + error.message, true);
+    return;
+  }
+  setAuthStatus('வெற்றிகரமாக உள்நுழைந்துள்ளீர்கள்: ' + data.user.email);
+}
+
+async function logoutUser(){
+  const { error } = await db.auth.signOut();
+  if(error){
+    setAuthStatus('Logout Error: ' + error.message, true);
+    return;
+  }
+  setAuthStatus('வெளியேறிவிட்டீர்கள் (Logged out).');
+}
+
+db.auth.getUser().then(({ data }) => {
+  if(data && data.user){
+    setAuthStatus('தற்போது உள்நுழைந்துள்ள பயனர்: ' + data.user.email);
+  }
+});
 
 loadPosts();
 </script>
